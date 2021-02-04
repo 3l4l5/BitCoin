@@ -6,11 +6,9 @@ import os, json
 import python_bitbankcc 
 
 class Trade:
-    def __init__(self, buy_sell, key1, key2):
-
+    def __init__(self, buy_sell ,auto, diff, pair, key1, key2):
         api_key = key1
         secret_key = key2
-
         
         # APIキー，シークレットの設定
         API_KEY = api_key
@@ -21,24 +19,66 @@ class Trade:
         self.prv = python_bitbankcc.private(API_KEY, API_SECRET)
         
         # 各データの取得
-        self.value = self.pub.get_ticker( 'eth_jpy' )
-        self.buy = int(self.value['buy'])
-        self.sell = int(self.value['sell'])
+        self.pair = pair
         self.buy_sell = buy_sell
-        
-        # 購入する値段を決定
-        self.price_decition()
+        self.diff = diff
+        self.auto = True if auto == 1 else False if auto == 2 else "Error"
 
-    def price_decition(self):
-        self.buy_price = self.buy+ 3000
+    # 購入する値段を決定する関数
+    def price_decition_auto(self):
+        # asks -> 売り板　基本的に高い値で買いたいので約定することを目的とすると最小値で指定する
+        # bids -> 買い板 基本的に安い値で買いたいので約定することを目的とすると最大値で指定する
+        depth = self.pub.get_depth(self.pair)
+        asks = depth["asks"]
+        bids = depth["bids"]
+        buy_price = np.array(bids).T[0][0]
+        sell_price = np.array(asks).T[0][0]
+        
+        return {"buy":buy_price, "sell":sell_price}
     
-    def buy_or_sell(self, pair='eth_jpy', amount='0.0001'):
+    # 手動で値を設定する
+    def price_decition_manual(self):
+        
+        # 今取引されている値を読み取る
+        value = self.pub.get_ticker(self.pair)
+        buy = int(value['buy'])
+        sell = int(value['sell'])
+        
+        # 値を決定する
+        buy_price = buy + self.diff
+        sell_price = sell - self.diff
+        
+        return {"buy":buy_price, "sell":sell_price}
+    
+    # 実際に取引を行う関数
+    def buy_or_sell(self, amount='0.0001'):
+        # self.buy_sellにどちらの数字が入っているか確認する。
         buy_sell = 'buy' if self.buy_sell==1 else 'sell' if self.buy_sell==2 else 'None'
-        value = self.prv.order(
-           pair, # ペア
-           self.buy_price, # 価格
-           amount, # 注文枚数
-           buy_sell, # 注文サイド
-           'market' # 注文タイプ
-        )
-        print(json.dumps(value))
+        # 自動もしくは手動で取引金額を設定する
+        price = self.price_decition_auto() if self.auto else self.price_decition_manual()
+        # とりひきペアを設定
+        pair = self.pair
+
+        if buy_sell == 'buy':
+        
+            value = self.prv.order(
+               pair, # ペア
+               price["buy"], # 価格
+               amount, # 注文枚数
+               buy_sell, # 注文サイド
+               'market' # 注文タイプ
+            )
+            print(json.dumps(value))
+        if buy_sell == 'sell':
+            
+            value = self.prv.order(
+               pair, # ペア
+               price["sell"], # 価格
+               amount, # 注文枚数
+               buy_sell, # 注文サイド
+               'market' # 注文タイプ
+            )
+            print(json.dumps(value))
+        
+        else:
+            print("error:不正な入力です")
