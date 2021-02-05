@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import os, json
 # python_bitbankccのパッケージをインポート
 import python_bitbankcc 
@@ -59,26 +58,17 @@ class Trade:
         # とりひきペアを設定
         pair = self.pair
 
-        if buy_sell == 'buy':
-        
-            value = self.prv.order(
-               pair, # ペア
-               price["buy"], # 価格
-               amount, # 注文枚数
-               buy_sell, # 注文サイド
-               'market' # 注文タイプ
-            )
-            print(json.dumps(value))
-        if buy_sell == 'sell':
-            
-            value = self.prv.order(
-               pair, # ペア
-               price["sell"], # 価格
-               amount, # 注文枚数
-               buy_sell, # 注文サイド
-               'market' # 注文タイプ
-            )
-            print(json.dumps(value))
-        
-        else:
-            print("error:不正な入力です")
+
+        value = self.prv.order(
+            pair, # ペア
+            price[buy_sell], # 価格
+            amount, # 注文枚数
+            buy_sell, # 注文サイド
+            'market' # 注文タイプ
+        )
+        print("order id:",value["order_id"])
+        print("pair:", value["pair"])
+        print("side:",value["side"])
+        print("購入量:",value["start_amount"])
+        print("購入時刻:", (value["ordered_at"]))
+

@@ -16,3 +16,8 @@ def authentication(password):
     nums = re.findall(pattern, key2)
     key2 = ''.join([a[0]+str(int(a[1])-password) for a in nums])
     return key1, key2
+
+if __name__ == "__main__":
+    a, b = authentication(123)
+    print(a)
+    print(b)

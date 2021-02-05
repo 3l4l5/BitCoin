@@ -14,8 +14,9 @@ if __name__ == '__main__':
         # パスワードの認証
         print("起動コマンドを入力")
         password = input()
-        API_KEY, API_SECRET = authentication(int(password))
-
+        #API_KEY, API_SECRET = authentication(int(password))
+        API_KEY = #"d4861a86-102e-45ab-8565-b5c0568c6228"
+        API_SECRET = #"35329df1d68f25f93e8ef6a44a691dd31115535873d5ca27c87e279f29ed5dd9"
         print("-"*columns_size)
         while True:
             print("取引を行いたい通貨ペアを入力してください")
@@ -68,23 +69,21 @@ if __name__ == '__main__':
         while True:
             print("購入注文：１　売却注文：２")
             buy_or_sell = int(input())
-            t = Trade(
-                buy_sell=buy_or_sell,
-                auto=auto_buy_ornot, 
-                diff=0,
-                pair=pares[pare],
-                key1=API_KEY, 
-                key2=API_SECRET
-                )
-            t.buy_or_sell()
 
-
-
-
-
-
-
-
+            if buy_or_sell == 1 or buy_or_sell == 2:
+                t = Trade(
+                    buy_sell=buy_or_sell,
+                    auto=auto_buy_ornot, 
+                    diff=0,
+                    pair=pares[pare],
+                    key1=API_KEY, 
+                    key2=API_SECRET
+                    )
+                t.buy_or_sell()
+            else:
+                print("不正な入力です")
+            print("-"*columns_size)
+            
     except KeyboardInterrupt:
         print("停止しました")
         #send_message("自動取引プログラムを終了しました")
