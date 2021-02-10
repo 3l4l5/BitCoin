@@ -2,21 +2,22 @@ import numpy as np
 import pandas as pd
 import os, json
 # python_bitbankccのパッケージをインポート
-import python_bitbankcc 
+import python_bitbankcc
 
 class Trade:
-    def __init__(self, buy_sell ,auto, diff, pair, key1, key2):
+    def __init__(self, buy_sell ,auto, diff, pair, key1, key2, amount):
         api_key = key1
         secret_key = key2
-        
+
+        self.amount = amount
         # APIキー，シークレットの設定
         API_KEY = api_key
         API_SECRET = secret_key
-        
+
         # APIの取得
         self.pub = python_bitbankcc.public()
         self.prv = python_bitbankcc.private(API_KEY, API_SECRET)
-        
+
         # 各データの取得
         self.pair = pair
         self.buy_sell = buy_sell
@@ -32,25 +33,25 @@ class Trade:
         bids = depth["bids"]
         buy_price = np.array(bids).T[0][0]
         sell_price = np.array(asks).T[0][0]
-        
+
         return {"buy":buy_price, "sell":sell_price}
-    
+
     # 手動で値を設定する
     def price_decition_manual(self):
-        
+
         # 今取引されている値を読み取る
         value = self.pub.get_ticker(self.pair)
         buy = int(value['buy'])
         sell = int(value['sell'])
-        
+
         # 値を決定する
         buy_price = buy + self.diff
         sell_price = sell - self.diff
-        
+
         return {"buy":buy_price, "sell":sell_price}
-    
+
     # 実際に取引を行う関数
-    def buy_or_sell(self, amount='0.0001'):
+    def buy_or_sell(self):
         # self.buy_sellにどちらの数字が入っているか確認する。
         buy_sell = 'buy' if self.buy_sell==1 else 'sell' if self.buy_sell==2 else 'None'
         # 自動もしくは手動で取引金額を設定する
@@ -62,7 +63,7 @@ class Trade:
         value = self.prv.order(
             pair, # ペア
             price[buy_sell], # 価格
-            amount, # 注文枚数
+            self.amount, # 注文枚数
             buy_sell, # 注文サイド
             'market' # 注文タイプ
         )
