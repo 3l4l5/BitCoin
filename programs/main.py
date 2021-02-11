@@ -19,14 +19,27 @@ if __name__ == '__main__':
         API_SECRET = "35329df1d68f25f93e8ef6a44a691dd31115535873d5ca27c87e279f29ed5dd9"
         print("-"*columns_size)
         while True:
-            print("取引を行いたい通貨ペアを入力してください")
-            print("1:ETH-JPY")
-            print("2:BTC-JPY")
+            #btc_jpy, xrp_jpy, ltc_jpy, eth_jpy, mona_jpy, bcc_jpy, xlm_jpy, qtum_jpy
+            print("取引を行いたいペアを入力してください")
+            print("1:eth_jpy")
+            print("2:btc_jpy")
+            print("3:xrp_jpy")
+            print("4:ltc_jpy")
+            print("5:mona_jpy")
+            print("6:bcc_jpy")
+            print("7:xlm_jpy")
+            print("8:qtum_jpy")
             pare = input()
 
             pares = {
                 "1":"eth_jpy",
                 "2":"btc_jpy",
+                "3":"xrp_jpy",
+                "4":"ltc_jpy",
+                "5":"mona_jpy",
+                "6":"bcc_jpy",
+                "7":"xlm_jpy",
+                "8":"qtum_jpy",
             }
             try:
                 pares[pare]
@@ -36,6 +49,7 @@ if __name__ == '__main__':
 
         # 一回での取引枚数の設定
         print("-"*columns_size)
+        print("取引ペア：",pares[pare])
         while True:
             pub = python_bitbankcc.public()
             value = pub.get_ticker(pares[pare])
@@ -50,6 +64,7 @@ if __name__ == '__main__':
                 print("不正な入力です。もう一度入力してください")
 
         print("-"*columns_size)
+        print("取引ペア：",pares[pare],"　取引枚数：",amount)
         while True:
             print("自動価格設定機能を使用しますか？")
             print("Yes:1, No:2")
@@ -78,11 +93,8 @@ if __name__ == '__main__':
                 print("入力が不正です。もう一度入力してください")
 
         print("-"*columns_size)
+        print("取引ペア:", pares[pare], "  取引枚数:", amount, "  自動価格設定" if auto_buy_ornot=="1" else "手動価格設定値：", diff)
         print("これより取引を開始いたします。")
-        print("ペア:", pares[pare])
-        print("取引量:", amount)
-        print("自動価格設定" if auto_buy_ornot=="1" else "手動価格設定値：", diff)
-
         while True:
             print("購入注文：１　売却注文：２")
             buy_or_sell = int(input())
