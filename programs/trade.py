@@ -3,6 +3,7 @@ import pandas as pd
 import os, json
 # python_bitbankccのパッケージをインポート
 import python_bitbankcc
+import datetime
 
 class Trade:
     def __init__(self, buy_sell ,auto, diff, pair, key1, key2, amount):
@@ -71,5 +72,6 @@ class Trade:
         print("pair:", value["pair"])
         print("side:",value["side"])
         print("購入量:",value["start_amount"])
-        print("購入時刻:", (value["ordered_at"]))
+        print("購入時刻:", datetime.datetime.fromtimestamp(int(value["ordered_at"]/1000)).strftime("%Y/%m/%d %H:%M:%S"))
+        
 

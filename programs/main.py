@@ -8,7 +8,7 @@ import shutil
 if __name__ == '__main__':
     terminal_size = shutil.get_terminal_size()
     columns_size = terminal_size.columns
-    #send_message("自動取引プログラムを始動しました")
+    send_message("プログラム始動")
     try:
         print("-"*columns_size)
         # パスワードの認証
@@ -53,15 +53,25 @@ if __name__ == '__main__':
         while True:
             pub = python_bitbankcc.public()
             value = pub.get_ticker(pares[pare])
-
-            print("一回での取引枚数を設定してください")
+            print("一回の取引での取引金額もしくは取引枚数を指定してください")
+            print("例1)100円分購入したい場合：y100")
+            print("例2)100枚分購入したい場合：c100")
             print("参考：ただいまの",pares[pare], "の値段は", value['last'],"円/",pares[pare][:3],"です。")
 
-            try:
-                amount = float(input())
-                break
-            except:
-                print("不正な入力です。もう一度入力してください")
+            while True:
+                buffer = input()
+                yen_or_not = buffer[0]
+                if yen_or_not == "y" or yen_or_not == "c":
+                    try:
+                        yen_or_coin = float(buffer[1:])
+                        amount = yen_or_coin if yen_or_not == "c" else yen_or_coin/float(value['last'])
+                        break
+                    except Exception as e:
+                        print("例外args:", e.args)
+                        print("不正な入力です。もう一度入力し直してください")
+                else:
+                    print("不正な入力です。もう一度入力してください!")
+            break
 
         print("-"*columns_size)
         print("取引ペア：",pares[pare],"　取引枚数：",amount)
