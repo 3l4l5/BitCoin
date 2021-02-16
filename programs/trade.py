@@ -68,10 +68,15 @@ class Trade:
             buy_sell, # 注文サイド
             'market' # 注文タイプ
         )
+        pub = python_bitbankcc.public()
+        pub_value = pub.get_ticker(pair)
+
         print("order id:",value["order_id"])
         print("pair:", value["pair"])
         print("side:",value["side"])
-        print("購入量:",value["start_amount"])
+        print("購入量:" if self.buy_sell==1 else "売却量",value["start_amount"])
         print("購入時刻:", datetime.datetime.fromtimestamp(int(value["ordered_at"]/1000)).strftime("%Y/%m/%d %H:%M:%S"))
-        
+        hoge = float(value["start_amount"])*float(pub_value['last'])
 
+        hogehoge = (hoge, 0) if self.buy_sell==1 else (0, hoge)
+        return hogehoge[0], hogehoge[1]

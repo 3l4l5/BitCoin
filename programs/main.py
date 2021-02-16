@@ -4,8 +4,11 @@ from linenotify import send_message
 import python_bitbankcc
 import sys
 import shutil
+import datetime
 
 if __name__ == '__main__':
+    buy_sum = 0
+    sell_sum = 0
     terminal_size = shutil.get_terminal_size()
     columns_size = terminal_size.columns
     send_message("プログラム始動")
@@ -13,14 +16,14 @@ if __name__ == '__main__':
         print("-"*columns_size)
         # パスワードの認証
         print("起動コマンドを入力")
-        password = input()
-        #API_KEY, API_SECRET = authentication(int(password))
-        f = open('../key/apikey.txt', 'r', encoding='UTF-8')
-        API_KEY = f.read()
-        f.close()
-        f = open('../key/secretkey.txt', 'r', encoding='UTF-8')
-        API_SECRET = f.read()
-        f.close()
+        password = input(">>>")
+        API_KEY, API_SECRET = authentication(int(password))
+        #f = open('../key/apikey.txt', 'r', encoding='UTF-8')
+        #API_KEY = f.read()
+        #f.close()
+        #f = open('../key/secretkey.txt', 'r', encoding='UTF-8')
+        #API_SECRET = f.read()
+        #f.close()
 
         print("-"*columns_size)
         while True:
@@ -34,7 +37,7 @@ if __name__ == '__main__':
             print("6:bcc_jpy")
             print("7:xlm_jpy")
             print("8:qtum_jpy")
-            pare = input()
+            pare = input(">>>")
 
             pares = {
                 "1":"eth_jpy",
@@ -64,7 +67,7 @@ if __name__ == '__main__':
             print("参考：ただいまの",pares[pare], "の値段は", value['last'],"円/",pares[pare][:3],"です。")
 
             while True:
-                buffer = input()
+                buffer = input(">>>")
                 yen_or_not = buffer[0]
                 if yen_or_not == "y" or yen_or_not == "c":
                     try:
@@ -83,7 +86,7 @@ if __name__ == '__main__':
         while True:
             print("自動価格設定機能を使用しますか？")
             print("Yes:1, No:2")
-            auto_buy_ornot = input()
+            auto_buy_ornot = input(">>>")
 
             # 自動価格設定機能を使用する場合の処理
             if auto_buy_ornot=="1":
@@ -99,7 +102,7 @@ if __name__ == '__main__':
                 while True:
                     print("購入時にとる現在の値との差分を入力してください")
                     try:
-                        diff = float(input())
+                        diff = float(input(">>>"))
                         break
                     except:
                         print("値が不正です。正しい値を入力してください。")
@@ -108,28 +111,50 @@ if __name__ == '__main__':
                 print("入力が不正です。もう一度入力してください")
 
         print("-"*columns_size)
-        
+
         print("これより取引を開始いたします。")
         while True:
-            print("取引ペア:", pares[pare], "  取引枚数:", amount, "  自動価格設定" if auto_buy_ornot=="1" else "手動価格設定値：", diff)
-            print("購入注文：１　売却注文：２")
-            buy_or_sell = int(input())
+            print_chr = "| pair:"+pares[pare]+" amount:"+str(amount)+(" Auto mode" if auto_buy_ornot=="1" else "Manual mode( mergin:"+str(diff)+")")+" |"
+            status_len = len(print_chr)
+            print("|","="*(status_len-4),"|")
+            print(print_chr)
+            print("|","="*(status_len-4),"|")
+            print("購入注文：１　売却注文：２ 取引実績確認：0")
+            buy_or_sell = int(input(">>>"))
 
             if buy_or_sell == 1 or buy_or_sell == 2:
-                t = Trade(
-                    buy_sell=buy_or_sell,
-                    auto=auto_buy_ornot,
-                    diff=0,
-                    pair=pares[pare],
-                    key1=API_KEY,
-                    key2=API_SECRET,
-                    amount=amount
-                    )
-                t.buy_or_sell()
+                try:
+                    t = Trade(
+                        buy_sell=buy_or_sell,
+                        auto=auto_buy_ornot,
+                        diff=0,
+                        pair=pares[pare],
+                        key1=API_KEY,
+                        key2=API_SECRET,
+                        amount=amount
+                        )
+                    buy_buffer, sell_buffer = t.buy_or_sell()
+                    buy_sum += buy_buffer
+                    sell_sum += sell_buffer
+                except Exception as e:
+                    print(e)
             else:
-                print("不正な入力です")
+                if buy_or_sell == 0:
+                    print("*"*columns_size)
+                    print("現在の取引実績")
+                    dt_now = datetime.datetime.now()
+                    print(dt_now.strftime('%Y年%m月%d日 %H:%M:%S'))
+                    print("購入合計：", buy_sum)
+                    print("売却合計：", sell_sum)
+                    print("総利益：", sell_sum - buy_sum)
+                    print("*"*columns_size)
+                else:
+                    print("不正な入力です")
             print("-"*columns_size)
 
     except KeyboardInterrupt:
         print("停止しました")
-        #send_message("自動取引プログラムを終了しました")
+        print("今回の総利益",sell_sum - buy_sum)
+        send_message("今回の利益額は")
+        send_message("今回の利益額は"+str(sell_sum - buy_sum)[:5]+"円でした。")
+        send_message("自動取引プログラムを終了しました")
